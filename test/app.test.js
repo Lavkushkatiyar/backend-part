@@ -186,3 +186,85 @@ describe("express app", () => {
     expect(res.body.user.id).toBe("1");
   });
 });
+describe("task routes", () => {
+  test("create task succeeds with valid token", async () => {
+    const login = await request(app)
+      .post("/auth/login")
+      .send({ id: "1", password: "123" });
+
+    const token = login.body.token;
+
+    const res = await request(app)
+      .post("/tasks")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        title: "learn jwt",
+        description: "practice backend",
+      });
+
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveProperty("id");
+    expect(res.body.title).toBe("learn jwt");
+    expect(res.body.status).toBe("pending");
+  });
+
+  test("create task fails without token", async () => {
+    const res = await request(app).post("/tasks").send({
+      title: "learn jwt",
+    });
+
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({ error: "token required" });
+  });
+
+  test("create task fails when title is missing", async () => {
+    const login = await request(app)
+      .post("/auth/login")
+      .send({ id: "1", password: "123" });
+
+    const token = login.body.token;
+
+    const res = await request(app)
+      .post("/tasks")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        description: "missing title",
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({
+      error: "title is required",
+    });
+  });
+
+  test("get tasks returns created tasks", async () => {
+    const login = await request(app)
+      .post("/auth/login")
+      .send({ id: "1", password: "123" });
+
+    const token = login.body.token;
+
+    await request(app)
+      .post("/tasks")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        title: "task one",
+        description: "first task",
+      });
+
+    const res = await request(app)
+      .get("/tasks")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThan(0);
+  });
+
+  test("get tasks fails without token", async () => {
+    const res = await request(app).get("/tasks");
+
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({ error: "token required" });
+  });
+});

@@ -1,11 +1,36 @@
 const express = require("express");
-const { getToken, isValidUser, addNewUser } = require("./src/utils.js");
+
+const { getToken, isValidUser, addNewUser, createTask, getTasks } = require("./src/utils.js");
 const authMiddleware = require("./src/middleware/auth_middleware.js");
 const app = express();
 const PORT = 8000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.get("/tasks", authMiddleware, (req, res) => {
+  const tasks = getTasks(req.user);
+
+  return res.json(tasks);
+});
+
+app.post("/tasks", authMiddleware, (req, res) => {
+  const { title, description } = req.body;
+
+  if (!title) {
+    return res.status(400).json({
+      error: "title is required",
+    });
+  }
+
+  const task = createTask({
+    title,
+    description,
+    userId: req.user.id,
+  });
+
+  return res.status(201).json(task);
+});
 
 const postHandler = (req, res) => {
   const body = req.body;
