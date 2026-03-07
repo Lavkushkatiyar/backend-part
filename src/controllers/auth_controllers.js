@@ -13,10 +13,12 @@ const registerHandler = async (req, res) => {
       error: "body must contain only id and password",
     });
   }
-
-  const id = await addNewUser(body.id, body.password);
-  console.log(id);
-  return res.json({ id, msg: "user created" });
+  try {
+    const id = await addNewUser(body.id, body.password);
+    return res.json({ id, msg: "user created" });
+  } catch {
+    return res.status(400).json({ error: "user already exists" });
+  }
 };
 
 const loginHandler = async (req, res) => {

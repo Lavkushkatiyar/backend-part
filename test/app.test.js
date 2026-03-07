@@ -1,11 +1,16 @@
 const request = require("supertest");
 const app = require("../index.js");
+
 describe("express app", () => {
-  test("register succeeds with valid id and password", async () => {
+  test("register fails if the user already exists", async () => {
     const userToSend = { id: "lavkush", password: "1234" };
+
+    await request(app).post("/auth/register").send(userToSend);
+
     const res = await request(app).post("/auth/register").send(userToSend);
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({ id: userToSend.id, msg: "user created" });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: "user already exists" });
   });
 
   test("register fails when password is missing", async () => {

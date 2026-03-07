@@ -6,7 +6,7 @@ const getTasksHandler = async (req, res) => {
   return res.json(tasks);
 };
 
-const createTaskHandler = (req, res) => {
+const createTaskHandler = async (req, res) => {
   const { title, description } = req.body;
 
   if (!title) {
@@ -15,7 +15,7 @@ const createTaskHandler = (req, res) => {
     });
   }
 
-  const task = createTask({
+  const task = await createTask({
     title,
     description,
     userId: req.user.id,

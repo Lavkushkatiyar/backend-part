@@ -99,6 +99,11 @@ const getToken = ({ id, role }, time = "1h") => {
 const addNewUser = async (id, password) => {
   const repo = getUserRepo();
 
+  const existing = await repo.findOne({ where: { id } });
+  if (existing) {
+    throw new Error("user exists");
+  }
+
   const user = await repo.save({
     id,
     password,

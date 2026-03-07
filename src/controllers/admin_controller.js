@@ -1,20 +1,20 @@
 const { getAllUsers, deleteUser } = require("../utils");
 
-const getUsersHandler = (req, res) => {
+const getUsersHandler = async (req, res) => {
   if (req.user.role !== "admin") {
     return res.status(403).json({ error: "admin access required" });
   }
 
-  const users = getAllUsers();
+  const users = await getAllUsers();
   return res.json(users);
 };
 
-const deleteUserHandler = (req, res) => {
+const deleteUserHandler = async (req, res) => {
   if (req.user.role !== "admin") {
     return res.status(403).json({ error: "admin access required" });
   }
 
-  const user = deleteUser(req.params.id);
+  const user = await deleteUser(req.params.id);
 
   if (!user) {
     return res.status(404).json({ error: "user not found" });
