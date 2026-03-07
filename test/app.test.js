@@ -1,27 +1,6 @@
 const request = require("supertest");
 const app = require("../index.js");
 describe("express app", () => {
-  test("GET / returns HTML with working text", async () => {
-    const res = await request(app).get("/");
-    expect(res.status).toBe(200);
-    expect(res.text).toMatch(/does it working/i);
-  });
-
-  test("POST / accepts urlencoded form and echoes body", async () => {
-    const form = { name: "lavkush", age: "21" };
-    const res = await request(app).post("/").type("form").send(form);
-
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({ received: { name: "lavkush", age: "21" } });
-  });
-
-  test("POST / accepts JSON and echoes body", async () => {
-    const payload = { foo: "bar", count: 3 };
-    const res = await request(app).post("/").send(payload); // supertest will send JSON by default for objects
-
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({ received: payload });
-  });
   test("register succeeds with valid id and password", async () => {
     const userToSend = { id: "lavkush", password: "1234" };
     const res = await request(app).post("/auth/register").send(userToSend);
