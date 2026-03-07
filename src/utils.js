@@ -6,20 +6,21 @@ const getToken = (id, time = "1h") => {
   return token;
 };
 
-
 const users = [
   {
     id: "1",
     password: "123",
+    role: "admin",
   },
 ];
 const addNewUser = (id, password) => {
   // after register
-  users.push({ id, password });
+  users.push({ id, password, role: "user" });
   return id;
 };
 const isValidUser = (id, password) =>
-  users.some((user) => user.id === id && user.password === password);
+  users.find((user) => user.id === id && user.password === password);
+
 module.exports = {
   addNewUser,
   getToken,

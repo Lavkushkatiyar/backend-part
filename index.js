@@ -51,14 +51,14 @@ app.route("/auth/login").post((req, res) => {
   }
 
   const { id, password } = body;
-
-  if (!isValidUser(id, password)) {
+  const user = isValidUser(id, password);
+  if (!user) {
     return res.status(401).json({
       error: "invalid credentials",
     });
   }
 
-  const token = getToken(id);
+  const token = getToken(user.id);
   return res.json({ token });
 });
 module.exports = app;
