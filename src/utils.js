@@ -43,6 +43,18 @@ const deleteTask = (taskId, user) => {
 
   return task;
 };
+const getAllUsers = () => users;
+
+const deleteUser = (userId) => {
+  const index = users.findIndex((u) => u.id === userId);
+
+  if (index === -1) return null;
+
+  const user = users[index];
+  users.splice(index, 1);
+
+  return user;
+};
 
 const createTask = ({ title, description, userId }) => {
   const task = {
@@ -80,6 +92,8 @@ const isValidUser = (id, password) =>
 
 module.exports = {
   addNewUser,
+  getAllUsers,
+  deleteUser,
   getToken,
   isValidUser,
   createTask,

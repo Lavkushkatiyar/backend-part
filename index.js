@@ -1,4 +1,8 @@
 const express = require("express");
+const {
+  getUsersHandler,
+  deleteUserHandler,
+} = require("./src/controllers/admin_controller");
 
 const authMiddleware = require("./src/middleware/auth_middleware.js");
 const {
@@ -24,6 +28,10 @@ app
   .delete(authMiddleware, deleteTaskHandler);
 
 app.get("/tasks", authMiddleware, getTasksHandler);
+
+app.get("/users", authMiddleware, getUsersHandler);
+
+app.delete("/users/:id", authMiddleware, deleteUserHandler);
 
 app.post("/tasks", authMiddleware, createTaskHandler);
 

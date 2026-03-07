@@ -324,3 +324,90 @@ describe("task update and delete routes", () => {
     expect(res.body).toEqual({ error: "task not found" });
   });
 });
+describe("admin user routes", () => {
+  const loginAndGetToken = async (id = "1", password = "123") => {
+    const res = await request(app).post("/auth/login").send({ id, password });
+
+    return res.body.token;
+  };
+
+  test("admin can get all users", async () => {
+    const token = await loginAndGetToken();
+
+    const res = await request(app)
+      .get("/users")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThan(0);
+  });
+
+  test("non-admin cannot get users", async () => {
+    await request(app)
+      .post("/auth/register")
+      .send({ id: "normalUser", password: "1234" });
+
+    const token = await loginAndGetToken("normalUser", "1234");
+
+    const res = await request(app)
+      .get("/users")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(403);
+    expect(res.body).toEqual({
+      error: "admin access required",
+    });
+  });
+
+  test("admin can delete a user", async () => {
+    await request(app)
+      .post("/auth/register")
+      .send({ id: "userToDelete", password: "1234" });
+
+    const token = await loginAndGetToken();
+
+    const res = await request(app)
+      .delete("/users/userToDelete")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      msg: "user deleted",
+    });
+  });
+
+  test("delete user fails if user not found", async () => {
+    const token = await loginAndGetToken();
+
+    const res = await request(app)
+      .delete("/users/non_existing_user")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({
+      error: "user not found",
+    });
+  });
+
+  test("non-admin cannot delete user", async () => {
+    await request(app)
+      .post("/auth/register")
+      .send({ id: "userA", password: "1234" });
+
+    await request(app)
+      .post("/auth/register")
+      .send({ id: "userB", password: "1234" });
+
+    const token = await loginAndGetToken("userA", "1234");
+
+    const res = await request(app)
+      .delete("/users/userB")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(403);
+    expect(res.body).toEqual({
+      error: "admin access required",
+    });
+  });
+});
