@@ -18,10 +18,9 @@
 10. [Testing](#testing)
 11. [Error Handling & Logging](#error-handling--logging)
 12. [Security Considerations](#security-considerations)
-13. [Deployment & CI/CD](#deployment--cicd)
-14. [Operational Notes](#operational-notes)
-15. [Future Improvements](#future-improvements)
-16. [Appendix: Examples and Useful Commands](#appendix-examples-and-useful-commands)
+13. [Operational Notes](#operational-notes)
+14. [Future Improvements](#future-improvements)
+15. [Appendix: Examples and Useful Commands](#appendix-examples-and-useful-commands)
 
 ---
 

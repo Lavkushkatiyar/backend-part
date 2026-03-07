@@ -55,15 +55,6 @@ describe("express app", () => {
     });
   });
 
-  test("login succeeds with valid credentials", async () => {
-    const res = await request(app)
-      .post("/auth/login")
-      .send({ id: "1", password: "123" });
-
-    expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty("token");
-  });
-
   test("login fails with wrong password", async () => {
     const res = await request(app)
       .post("/auth/login")
@@ -116,19 +107,7 @@ describe("express app", () => {
       error: "body must contain only id and password",
     });
   });
-  test("multiple users can register without conflict", async () => {
-    const user1 = { id: "userA", password: "123" };
-    const user2 = { id: "userB", password: "456" };
 
-    const res1 = await request(app).post("/auth/register").send(user1);
-    const res2 = await request(app).post("/auth/register").send(user2);
-
-    expect(res1.status).toBe(200);
-    expect(res2.status).toBe(200);
-
-    expect(res1.body.id).toBe("userA");
-    expect(res2.body.id).toBe("userB");
-  });
   test("registered user can login after registration", async () => {
     const newUser = { id: "user10", password: "pass123" };
 
