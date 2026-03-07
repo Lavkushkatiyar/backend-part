@@ -3,7 +3,7 @@ const { DataSource } = require("typeorm");
 
 const AppDataSource = new DataSource({
   type: "sqlite",
-  database: "dev.db",
+  database: process.env.NODE_ENV === "test" ? ":memory:" : "dev.db",
   synchronize: true,
   logging: false,
   entities: [

@@ -1,3 +1,6 @@
+require("dotenv").config();
+const bcrypt = require("bcrypt");
+
 const express = require("express");
 const {
   getUsersHandler,
@@ -21,19 +24,8 @@ const app = express();
 const PORT = 8000;
 
 const AppDataSource = require("./src/db/data_source.js");
-const seedAdmin = async () => {
-  const repo = AppDataSource.getRepository("User");
+const { seedAdmin } = require("./src/utils.js");
 
-  const existing = await repo.findOne({ where: { id: "1" } });
-
-  if (!existing) {
-    await repo.save({
-      id: "1",
-      password: "123",
-      role: "admin",
-    });
-  }
-};
 AppDataSource.initialize()
   .then(async () => {
     await seedAdmin();
