@@ -11,6 +11,39 @@ const users = [
   },
 ];
 
+const updateTask = (taskId, updates, user) => {
+  const task = tasks.find((t) => t.id === taskId);
+
+  if (!task) return null;
+
+  const isOwner = task.userId === user.id;
+  const isAdmin = user.role === "admin";
+
+  if (!isOwner && !isAdmin) return "forbidden";
+
+  if (updates.title !== undefined) task.title = updates.title;
+  if (updates.description !== undefined) task.description = updates.description;
+  if (updates.status !== undefined) task.status = updates.status;
+
+  return task;
+};
+const deleteTask = (taskId, user) => {
+  const index = tasks.findIndex((t) => t.id === taskId);
+
+  if (index === -1) return null;
+
+  const task = tasks[index];
+
+  const isOwner = task.userId === user.id;
+  const isAdmin = user.role === "admin";
+
+  if (!isOwner && !isAdmin) return "forbidden";
+
+  tasks.splice(index, 1);
+
+  return task;
+};
+
 const createTask = ({ title, description, userId }) => {
   const task = {
     id: `task_${Date.now()}`,
@@ -46,9 +79,11 @@ const isValidUser = (id, password) =>
   users.find((user) => user.id === id && user.password === password);
 
 module.exports = {
-  getTasks,
-  createTask,
   addNewUser,
   getToken,
   isValidUser,
+  createTask,
+  getTasks,
+  updateTask,
+  deleteTask,
 };

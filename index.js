@@ -1,12 +1,53 @@
 const express = require("express");
 
-const { getToken, isValidUser, addNewUser, createTask, getTasks } = require("./src/utils.js");
+const {
+  getToken,
+  isValidUser,
+  addNewUser,
+  createTask,
+  getTasks,
+  updateTask,
+  deleteTask,
+} = require("./src/utils.js");
 const authMiddleware = require("./src/middleware/auth_middleware.js");
 const app = express();
 const PORT = 8000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+const updateTaskHandler = (req, res) => {
+  const task = updateTask(req.params.id, req.body, req.user);
+
+  if (task === null) {
+    return res.status(404).json({ error: "task not found" });
+  }
+
+  if (task === "forbidden") {
+    return res.status(403).json({ error: "not allowed" });
+  }
+
+  return res.json(task);
+};
+
+const deleteTaskHandler = (req, res) => {
+  const task = deleteTask(req.params.id, req.user);
+
+  if (task === null) {
+    return res.status(404).json({ error: "task not found" });
+  }
+
+  if (task === "forbidden") {
+    return res.status(403).json({ error: "not allowed" });
+  }
+
+  return res.json({ msg: "task deleted" });
+};
+
+app
+  .route("/tasks/:id")
+  .put(authMiddleware, updateTaskHandler)
+  .delete(authMiddleware, deleteTaskHandler);
 
 app.get("/tasks", authMiddleware, (req, res) => {
   const tasks = getTasks(req.user);

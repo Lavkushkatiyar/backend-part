@@ -268,3 +268,80 @@ describe("task routes", () => {
     expect(res.body).toEqual({ error: "token required" });
   });
 });
+describe("task update and delete routes", () => {
+  const loginAndGetToken = async () => {
+    const res = await request(app)
+      .post("/auth/login")
+      .send({ id: "1", password: "123" });
+
+    return res.body.token;
+  };
+
+  test("update task succeeds for owner", async () => {
+    const token = await loginAndGetToken();
+
+    const create = await request(app)
+      .post("/tasks")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        title: "task to update",
+        description: "update test",
+      });
+
+    const taskId = create.body.id;
+
+    const res = await request(app)
+      .put(`/tasks/${taskId}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        status: "completed",
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("completed");
+  });
+
+  test("update task fails if task not found", async () => {
+    const token = await loginAndGetToken();
+
+    const res = await request(app)
+      .put("/tasks/non_existing_task")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ status: "completed" });
+
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({ error: "task not found" });
+  });
+
+  test("delete task succeeds", async () => {
+    const token = await loginAndGetToken();
+
+    const create = await request(app)
+      .post("/tasks")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        title: "task to delete",
+        description: "delete test",
+      });
+
+    const taskId = create.body.id;
+
+    const res = await request(app)
+      .delete(`/tasks/${taskId}`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ msg: "task deleted" });
+  });
+
+  test("delete task fails when task does not exist", async () => {
+    const token = await loginAndGetToken();
+
+    const res = await request(app)
+      .delete("/tasks/unknown_task")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({ error: "task not found" });
+  });
+});
