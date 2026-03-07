@@ -1,6 +1,6 @@
 const { getToken, isValidUser, addNewUser } = require("../utils");
 
-const registerHandler = (req, res) => {
+const registerHandler = async (req, res) => {
   const body = req.body;
 
   const keys = Object.keys(body);
@@ -14,11 +14,12 @@ const registerHandler = (req, res) => {
     });
   }
 
-  const id = addNewUser(body.id, body.password);
-  return res.json({ id, msg: "some msg" });
+  const id = await addNewUser(body.id, body.password);
+  console.log(id);
+  return res.json({ id, msg: "user created" });
 };
 
-const loginHandler = (req, res) => {
+const loginHandler = async (req, res) => {
   const body = req.body;
 
   const keys = Object.keys(body);
@@ -33,7 +34,7 @@ const loginHandler = (req, res) => {
   }
 
   const { id, password } = body;
-  const user = isValidUser(id, password);
+  const user = await isValidUser(id, password);
 
   if (!user) {
     return res.status(401).json({

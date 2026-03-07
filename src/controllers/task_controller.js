@@ -1,9 +1,7 @@
-const { updateTask, deleteTask } = require("../utils");
+const { updateTask, deleteTask, getTasks, createTask } = require("../utils");
 
-const { getTasks, createTask } = require("../utils");
-
-const getTasksHandler = (req, res) => {
-  const tasks = getTasks(req.user);
+const getTasksHandler = async (req, res) => {
+  const tasks = await getTasks(req.user);
 
   return res.json(tasks);
 };
@@ -26,8 +24,8 @@ const createTaskHandler = (req, res) => {
   return res.status(201).json(task);
 };
 
-const updateTaskHandler = (req, res) => {
-  const task = updateTask(req.params.id, req.body, req.user);
+const updateTaskHandler = async (req, res) => {
+  const task = await updateTask(req.params.id, req.body, req.user);
 
   if (task === null) {
     return res.status(404).json({ error: "task not found" });
@@ -40,8 +38,8 @@ const updateTaskHandler = (req, res) => {
   return res.json(task);
 };
 
-const deleteTaskHandler = (req, res) => {
-  const task = deleteTask(req.params.id, req.user);
+const deleteTaskHandler = async (req, res) => {
+  const task = await deleteTask(req.params.id, req.user);
 
   if (task === null) {
     return res.status(404).json({ error: "task not found" });

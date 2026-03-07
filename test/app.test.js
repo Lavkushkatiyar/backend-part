@@ -4,9 +4,8 @@ describe("express app", () => {
   test("register succeeds with valid id and password", async () => {
     const userToSend = { id: "lavkush", password: "1234" };
     const res = await request(app).post("/auth/register").send(userToSend);
-
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ id: userToSend.id, msg: "some msg" });
+    expect(res.body).toEqual({ id: userToSend.id, msg: "user created" });
   });
 
   test("register fails when password is missing", async () => {

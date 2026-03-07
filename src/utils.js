@@ -1,94 +1,120 @@
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = "1234"; // put it into env file
+const JWT_SECRET = "1234";
 
-const tasks = [];
+const AppDataSource = require("./db/data_source");
 
-const users = [
-  {
-    id: "1",
-    password: "123",
-    role: "admin",
-  },
-];
+const getUserRepo = () => AppDataSource.getRepository("User");
+const getTaskRepo = () => AppDataSource.getRepository("Task");
 
-const updateTask = (taskId, updates, user) => {
-  const task = tasks.find((t) => t.id === taskId);
+const updateTask = async (taskId, updates, user) => {
+  const repo = getTaskRepo();
+
+  const task = await repo.findOne({
+    where: { id: taskId },
+    relations: ["user"],
+  });
 
   if (!task) return null;
 
-  const isOwner = task.userId === user.id;
+  const isOwner = task.user.id === user.id;
   const isAdmin = user.role === "admin";
 
   if (!isOwner && !isAdmin) return "forbidden";
 
-  if (updates.title !== undefined) task.title = updates.title;
-  if (updates.description !== undefined) task.description = updates.description;
-  if (updates.status !== undefined) task.status = updates.status;
+  await repo.update({ id: taskId }, updates);
 
-  return task;
+  return repo.findOne({ where: { id: taskId } });
 };
-const deleteTask = (taskId, user) => {
-  const index = tasks.findIndex((t) => t.id === taskId);
 
-  if (index === -1) return null;
+const deleteTask = async (taskId, user) => {
+  const repo = getTaskRepo();
 
-  const task = tasks[index];
+  const task = await repo.findOne({
+    where: { id: taskId },
+    relations: ["user"],
+  });
 
-  const isOwner = task.userId === user.id;
+  if (!task) return null;
+
+  const isOwner = task.user.id === user.id;
   const isAdmin = user.role === "admin";
 
   if (!isOwner && !isAdmin) return "forbidden";
 
-  tasks.splice(index, 1);
+  await repo.delete({ id: taskId });
 
-  return task;
-};
-const getAllUsers = () => users;
-
-const deleteUser = (userId) => {
-  const index = users.findIndex((u) => u.id === userId);
-
-  if (index === -1) return null;
-
-  const user = users[index];
-  users.splice(index, 1);
-
-  return user;
+  return true;
 };
 
-const createTask = ({ title, description, userId }) => {
-  const task = {
+const getAllUsers = async () => {
+  const repo = getUserRepo();
+  return repo.find();
+};
+
+const deleteUser = async (userId) => {
+  const repo = getUserRepo();
+
+  const user = await repo.findOne({ where: { id: userId } });
+
+  if (!user) return null;
+
+  await repo.delete({ id: userId });
+
+  return true;
+};
+
+const createTask = async ({ title, description, userId }) => {
+  const repo = getTaskRepo();
+
+  const task = await repo.save({
     id: `task_${Date.now()}`,
     title,
     description,
     status: "pending",
-    created_at: new Date().toISOString(),
-    userId,
-  };
-
-  tasks.push(task);
+    created_at: new Date(),
+    user: { id: userId },
+  });
 
   return task;
 };
 
-const getTasks = (user) =>
-  user.role === "admin"
-    ? tasks
-    : tasks.filter((task) => task.userId === user.id);
+const getTasks = async (user) => {
+  const repo = getTaskRepo();
+
+  if (user.role === "admin") {
+    return repo.find({ relations: ["user"] });
+  }
+
+  return repo.find({
+    where: { user: { id: user.id } },
+  });
+};
 
 const getToken = ({ id, role }, time = "1h") => {
-  const token = jwt.sign({ id, role }, JWT_SECRET, {
+  return jwt.sign({ id, role }, JWT_SECRET, {
     expiresIn: time,
   });
-  return token;
 };
-const addNewUser = (id, password) => {
-  // after register
-  users.push({ id, password, role: "user" });
-  return id;
+
+const addNewUser = async (id, password) => {
+  const repo = getUserRepo();
+
+  const user = await repo.save({
+    id,
+    password,
+    role: "user",
+  });
+
+  return user.id;
 };
-const isValidUser = (id, password) =>
-  users.find((user) => user.id === id && user.password === password);
+
+const isValidUser = async (id, password) => {
+  const repo = getUserRepo();
+
+  return repo.findOne({
+    where: { id, password },
+  });
+};
 
 module.exports = {
   addNewUser,
