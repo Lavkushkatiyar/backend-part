@@ -1,8 +1,9 @@
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = "1234"; // put it into env file
-const getToken = (id, time = "1h") => {
-  const token = jwt.sign({ id }, JWT_SECRET, { expiresIn: "1h" });
-
+const getToken = ({ id, role }, time = "1h") => {
+  const token = jwt.sign({ id, role }, JWT_SECRET, {
+    expiresIn: time,
+  });
   return token;
 };
 

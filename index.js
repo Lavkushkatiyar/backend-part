@@ -1,15 +1,20 @@
 const express = require("express");
 const { getToken, isValidUser, addNewUser } = require("./src/utils.js");
+const authMiddleware = require("./src/middleware/auth_middleware.js");
 const app = express();
 const PORT = 8000;
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 const postHandler = (req, res) => {
   const body = req.body;
-  console.log(body);
   res.json({ received: body });
 };
+
+app.get("/profile", authMiddleware, (req, res) => {
+  return res.json({ user: req.user });
+});
 
 app.get("/", (request, res) => {
   const html = "<h1> does it working <h1/>";
@@ -32,7 +37,6 @@ app.route("/auth/register").post((req, res) => {
     });
   }
   const id = addNewUser(body.id, body.password);
-  console.log(body);
   return res.json({ id, msg: "some msg" });
 });
 
@@ -58,7 +62,7 @@ app.route("/auth/login").post((req, res) => {
     });
   }
 
-  const token = getToken(user.id);
+  const token = getToken(user);
   return res.json({ token });
 });
 module.exports = app;

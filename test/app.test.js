@@ -156,4 +156,33 @@ describe("express app", () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty("token");
   });
+
+  test("profile route works with valid token", async () => {
+    const login = await request(app)
+      .post("/auth/login")
+      .send({ id: "1", password: "123" });
+
+    const token = login.body.token;
+
+    const res = await request(app)
+      .get("/profile")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.id).toBe("1");
+  });
+  test("profile route works with valid token", async () => {
+    const login = await request(app)
+      .post("/auth/login")
+      .send({ id: "1", password: "123" });
+
+    const token = login.body.token;
+
+    const res = await request(app)
+      .get("/profile")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.id).toBe("1");
+  });
 });
